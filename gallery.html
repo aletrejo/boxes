@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boxes - Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Scope+One&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #f7f6f4;
+      color: #111111;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Fixed background image layer with adjustable opacity */
+    .bg-image-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: url('images/background.png') no-repeat center center / cover;
+      opacity: 0.3;
+      /* Adjust this opacity percentage as needed */
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header navigation */
+    header {
+      position: relative;
+      width: 100%;
+      padding: 2.5rem 3.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .back-link {
+      font-family: 'Scope One', serif;
+      color: #111111;
+      text-decoration: none;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-link:hover {
+      opacity: 0.6;
+    }
+
+    .counter {
+      font-family: 'Scope One', serif;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      color: #555555;
+    }
+
+    /* Carousel viewport */
+    .carousel-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 1rem 5.5rem;
+      z-index: 5;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 92vw;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.99);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Image stage layout */
+    .images-stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      max-height: 68vh;
+      max-width: 100%;
+    }
+
+    .images-stage img {
+      max-height: 68vh;
+      width: auto;
+      object-fit: contain;
+      border-radius: 2px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+      background-color: #ffffff;
+    }
+
+    /* Diptych side-by-side mode */
+    .images-stage.diptych {
+      flex-direction: row;
+    }
+
+    .images-stage.diptych img {
+      max-width: calc(45vw - 1.5rem);
+      max-height: 64vh;
+    }
+
+    /* Single caption card */
+    .caption-card {
+      margin-top: 1.5rem;
+      text-align: center;
+      max-width: 580px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 0.9rem 1.8rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .caption-card p {
+      font-size: 0.95rem;
+      font-weight: 400;
+      color: #333333;
+      line-height: 1.6;
+      letter-spacing: 0.2px;
+    }
+
+    /* Navigation buttons */
+    .nav-btn {
+      position: absolute;
+      top: 48%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      color: #111111;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-btn:hover {
+      background: #111111;
+      color: #ffffff;
+      transform: translateY(-50%) scale(1.05);
+    }
+
+    .prev-btn {
+      left: 2rem;
+    }
+
+    .next-btn {
+      right: 2rem;
+    }
+
+    /* Indicator lines */
+    .indicators {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.6rem;
+      z-index: 10;
+    }
+
+    .dot {
+      width: 22px;
+      height: 3px;
+      background: rgba(0, 0, 0, 0.18);
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: #111111;
+      width: 36px;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 1.5rem 1.5rem 0.5rem;
+      }
+
+      .images-stage.diptych {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .images-stage.diptych img {
+        max-width: 90vw;
+        max-height: 34vh;
+      }
+
+      .images-stage img {
+        max-height: 55vh;
+      }
+
+      .nav-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1.25rem;
+      }
+
+      .prev-btn {
+        left: 0.5rem;
+      }
+
+      .next-btn {
+        right: 0.5rem;
+      }
+
+      .caption-card {
+        margin-top: 1rem;
+        padding: 0.75rem 1.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background image layer with 50% opacity -->
+  <div class="bg-image-layer"></div>
+
+  <header>
+    <a href="index.html" class="back-link">&larr; Boxes</a>
+    <div class="counter" id="counter">1 / 3</div>
+  </header>
+
+  <main class="carousel-container" id="carousel">
+    <button class="nav-btn prev-btn" id="prev-btn" aria-label="Previous slide">&#8249;</button>
+
+    <div class="slides-wrapper" id="slides-wrapper">
+      <!-- Slides injected by JS -->
+    </div>
+
+    <button class="nav-btn next-btn" id="next-btn" aria-label="Next slide">&#8250;</button>
+    <div class="indicators" id="indicators"></div>
+  </main>
+
+  <script>
+    /*
+      Configuration:
+      - 'images': Array of 1 or 2 photos.
+      - 'src': Local path or URL.
+      - 'alt': Purely for accessibility/screen readers; not shown visually.
+      - 'description': Single shared caption displayed underneath.
+    */
+    const slidesData = [
+      {
+        images: [
+          { src: "images/1.jpeg", alt: "A picture the New YOrk City skyline." }
+        ],
+        description: "I had always wanted to live in New York City. I loved the idea of living in a place that seemed the opposite of my conservative Mexican hometown."
+      },
+      {
+        // Diptych: Two photos side-by-side with one caption
+        images: [
+          { src: "images/1-2.jpeg", alt: "New York City skyline seen through a fence" },
+        ],
+        description: "But lately I've been questioning my role here."
+      },
+      {
+        images: [
+          { src: "images/2.jpeg", alt: "New York City skyline seen through a fence" }
+        ],
+        description: "The shine has worn off."
+      },
+      {
+        images: [
+          { src: "images/3.jpeg", alt: "An office cubicle" }
+        ],
+        description: "Increasingly I feel caged in."
+      },
+      {
+        images: [
+          { src: "images/4.jpeg", alt: "A black cat in front of moving boxes" }
+        ],
+        description: "It's all about boxes."
+      },
+      // {
+      //   images: [
+      //     { src: "images/5.jpeg", alt: "A pigeon that looks hurt" }
+      //   ],
+      //   description: "."
+      // },
+      {
+        images: [
+          { src: "images/6.jpeg", alt: "A screenshot of a video call" }
+        ],
+        description: "I miss my mom who I only see in a little box on my phone."
+      },
+      {
+        images: [
+          { src: "images/7.jpeg", alt: "The shadow outline of a woman" }
+        ],
+        description: "I worry about the boxes that I check for other people. Immigrant. Latina. Woman. To the point I just don't want to be seen."
+      },
+      {
+        images: [
+          { src: "images/8.jpeg", alt: "A turtle and hare sign" }
+        ],
+        description: "I don't know what to do. I feel like running away."
+      },
+      {
+        images: [
+          { src: "images/9.jpeg", alt: "A garden framed by a circular door." }
+        ],
+        description: "But when I run away I still feel trapped."
+      },
+      {
+        images: [
+          { src: "images/10.jpeg", alt: "A black cat sitting in a window sill" }
+        ],
+        description: "I feel relief when I'm back my apartment. This is my box."
+      },
+      {
+        images: [
+          { src: "images/11.jpeg", alt: "Two people smiling at the camera" }
+        ],
+        description: "And I share it with so many people I love."
+      },
+      {
+        images: [
+          { src: "images/12.jpeg", alt: "New York City skyline seen through a fence" }
+        ],
+        description: "I also get to see cool boxes sometimes. I guess it's not that bad here."
+      },
+      {
+        images: [
+          { src: "images/13-2.jpeg", alt: "Knicks themed conchas" }
+        ],
+        description: "I can have two homes."
+      },
+      {
+        images: [
+          { src: "images/14.jpeg", alt: "The Statue of Liberty seen through a ferry" }
+        ],
+        description: "I'd like to stay for a little bit longer."
+      }
+    ];
+
+    let currentIndex = 0;
+    const slidesWrapper = document.getElementById('slides-wrapper');
+    const indicatorsWrapper = document.getElementById('indicators');
+    const counter = document.getElementById('counter');
+
+    function initCarousel() {
+      slidesWrapper.innerHTML = '';
+      indicatorsWrapper.innerHTML = '';
+
+      slidesData.forEach((slide, idx) => {
+        const slideEl = document.createElement('div');
+        slideEl.className = `slide ${idx === 0 ? 'active' : ''}`;
+
+        const isDiptych = slide.images.length > 1;
+        const imagesHtml = slide.images.map(img => `
+          <img src="${img.src}" alt="${img.alt || ''}">
+        `).join('');
+
+        slideEl.innerHTML = `
+          <div class="images-stage ${isDiptych ? 'diptych' : ''}">
+            ${imagesHtml}
+          </div>
+          <div class="caption-card">
+            <p>${slide.description}</p>
+          </div>
+        `;
+        slidesWrapper.appendChild(slideEl);
+
+        const dot = document.createElement('div');
+        dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+        dot.addEventListener('click', () => goToSlide(idx));
+        indicatorsWrapper.appendChild(dot);
+      });
+
+      updateUI();
+    }
+
+    function goToSlide(index) {
+      const slides = document.querySelectorAll('.slide');
+      const dots = document.querySelectorAll('.dot');
+      if (!slides.length) return;
+
+      slides[currentIndex].classList.remove('active');
+      dots[currentIndex].classList.remove('active');
+
+      currentIndex = (index + slidesData.length) % slidesData.length;
+
+      slides[currentIndex].classList.add('active');
+      dots[currentIndex].classList.add('active');
+      updateUI();
+    }
+
+    function updateUI() {
+      counter.textContent = `${currentIndex + 1} / ${slidesData.length}`;
+    }
+
+    document.getElementById('prev-btn').addEventListener('click', () => goToSlide(currentIndex - 1));
+    document.getElementById('next-btn').addEventListener('click', () => goToSlide(currentIndex + 1));
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') goToSlide(currentIndex - 1);
+      if (e.key === 'ArrowRight') goToSlide(currentIndex + 1);
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    window.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) goToSlide(currentIndex + 1);
+      if (touchEndX - touchStartX > 50) goToSlide(currentIndex - 1);
+    });
+
+    initCarousel();
+  </script>
+
+</body>
+
+</html>
